@@ -109,6 +109,14 @@ docs/                           截图
 - `Timline.exe --screenshot-settings [路径]` — 同上，目标是设置窗口
 - `tools/make-icon.ps1` — 重新生成应用图标
 - `tools/write-rapid-test-config.ps1` + `tools/capture-corner.ps1` — 造出分钟级快速状态跳变并抓屏，用于验证通知
+- `tools/release.ps1` — 一键发版：自动递增版本号 → 打自包含单文件 exe → 创建 GitHub Release 并上传附件（变更日志自动取上一个 tag 以来的提交）。用法：
+
+  ```powershell
+  powershell -File tools\release.ps1                # 版本号自动递增 patch
+  powershell -File tools\release.ps1 -Version 2.0.0 # 指定版本号
+  powershell -File tools\release.ps1 -DryRun        # 只看计划，不打包不上传
+  ```
+
 
 ## 🙏 致谢
 
