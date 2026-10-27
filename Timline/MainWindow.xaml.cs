@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -17,6 +18,11 @@ namespace Timline;
 public partial class MainWindow : Window
 {
     private const double TrackWidth = 214;
+
+    // 设计尺寸：Viewbox 等比缩放的基准，WM_SIZING 钩子据此锁定窗口宽高比。
+    // 高度=内容自然高度+约 12px 的弹性间隔——弹性行过大时进度条与剩余工时之间会出现大空隙
+    private const double DesignWidth = 252;
+    private const double DesignHeight = 154;
 
     // 与进度条渐变一致的三个主题色（红→黄→绿）
     private static readonly Color BarRed = Color.FromRgb(0xF8, 0x51, 0x49);
@@ -39,6 +45,7 @@ public partial class MainWindow : Window
             () => Dispatcher.BeginInvoke(UpdateDisplay));
 
         ApplyCardStyle();
+        ApplySavedSize();
         PositionWindow();
 
         _timer.Tick += (_, _) => UpdateDisplay();
@@ -49,6 +56,8 @@ public partial class MainWindow : Window
         {
             _config.WindowX = Left;
             _config.WindowY = Top;
+            _config.WindowWidth = Width;
+            _config.WindowHeight = Height;
             ConfigService.Save(_config);
         };
 
@@ -87,6 +96,78 @@ public partial class MainWindow : Window
         var hwnd = new WindowInteropHelper(this).Handle;
         DwmInterop.ApplyRoundedCorners(hwnd);
         ApplyBlurVisuals();
+        ((HwndSource)PresentationSource.FromVisual(this)!).AddHook(WndProc);
+    }
+
+    // ---------- 大小调节 ----------
+
+    private const int WM_SIZING = 0x0214;
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct NativeRect
+    {
+        public int Left;
+        public int Top;
+        public int Right;
+        public int Bottom;
+    }
+
+    /// <summary>按启动配置恢复卡片大小：宽度取配置值，高度按设计比推导——
+    /// 旧版按 178 高保存的尺寸会自动迁移到新比例，避免恢复后 Viewbox 留白。</summary>
+    private void ApplySavedSize()
+    {
+        Width = Math.Clamp(_config.WindowWidth ?? DesignWidth, MinWidth, MaxWidth);
+        Height = Width * DesignHeight / DesignWidth;
+    }
+
+    /// <summary>
+    /// 拖拽边缘/角落缩放时锁定宽高比，保证 Viewbox 内容始终铺满窗口不变形：
+    /// 拖角落按对角等比缩放；拖左右边宽度跟随、高度以未拖动侧为锚；
+    /// 拖上下边高度跟随（宽度不变的话高度会被还原，表现为拖不动）、宽度以水平中心为锚对称扩展。
+    /// 坐标是物理像素，宽高比与 DPI 无关，直接按比例换算即可。
+    /// </summary>
+    private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+    {
+        const int WMSZ_LEFT = 1, WMSZ_RIGHT = 2, WMSZ_TOP = 3, WMSZ_TOPLEFT = 4,
+                  WMSZ_TOPRIGHT = 5, WMSZ_BOTTOM = 6, WMSZ_BOTTOMLEFT = 7, WMSZ_BOTTOMRIGHT = 8;
+
+        if (msg != WM_SIZING) return IntPtr.Zero;
+        var edge = wParam.ToInt32();
+        if (edge is not (WMSZ_LEFT or WMSZ_RIGHT or WMSZ_TOP or WMSZ_TOPLEFT or WMSZ_TOPRIGHT
+                         or WMSZ_BOTTOM or WMSZ_BOTTOMLEFT or WMSZ_BOTTOMRIGHT)) return IntPtr.Zero;
+
+        var rect = Marshal.PtrToStructure<NativeRect>(lParam);
+
+        if (edge is WMSZ_TOP or WMSZ_BOTTOM)
+        {
+            var height = (int)Math.Max(rect.Bottom - rect.Top, 60);
+            var width = (int)Math.Round(height * DesignWidth / DesignHeight);
+            var centerX = (rect.Left + rect.Right) / 2;
+            rect.Left = centerX - width / 2;
+            rect.Right = rect.Left + width;
+        }
+        else
+        {
+            var width = (int)Math.Max(rect.Right - rect.Left, MinWidth);
+            var height = (int)Math.Round(width * DesignHeight / DesignWidth);
+
+            if (edge is WMSZ_TOP or WMSZ_TOPLEFT or WMSZ_TOPRIGHT) rect.Top = rect.Bottom - height;
+            else rect.Bottom = rect.Top + height;
+
+            if (edge is WMSZ_LEFT or WMSZ_TOPLEFT or WMSZ_BOTTOMLEFT) rect.Left = rect.Right - width;
+            else rect.Right = rect.Left + width;
+        }
+
+        Marshal.StructureToPtr(rect, lParam, fDeleteOld: false);
+        handled = true;
+        return IntPtr.Zero;
+    }
+
+    private void OnResetSizeClick(object sender, RoutedEventArgs e)
+    {
+        Width = DesignWidth;
+        Height = DesignHeight;
+        ConfigService.Save(_config);
     }
 
     // ---------- 显示 ----------

@@ -6,7 +6,11 @@ namespace Timline.Interop;
 internal static class DwmInterop
 {
     private const int DWMWA_WINDOW_CORNER_PREFERENCE = 33;
-    private const int DWMWCP_ROUND = 2;
+    private const int DWMWCP_DEFAULT = 0;
+    private const int DWMWA_BORDER_COLOR = 34;
+
+    /// <summary>关闭系统窗口描边（Win11 默认给无边框窗口画 1px 边框线）。</summary>
+    private static readonly int DwmColorNone = unchecked((int)0xFFFFFFFE);
     private const int WCA_ACCENT_POLICY = 19;
     private const int ACCENT_DISABLED = 0;
     private const int ACCENT_ENABLE_ACRYLICBLURBEHIND = 4;
@@ -16,8 +20,12 @@ internal static class DwmInterop
         if (hwnd == IntPtr.Zero) return;
         try
         {
-            var preference = DWMWCP_ROUND;
-            DwmSetWindowAttribute(hwnd, DWMWA_WINDOW_CORNER_PREFERENCE, ref preference, sizeof(int));
+            // 角偏好显式设回默认：ROUND 会让 DWM 给窗口叠加系统阴影与描边（运行时实测），
+            // 阴影罩层是系统小圆角、与卡片 16px 圆角不一致；卡片圆角由 WPF 自绘，DWM 别插手
+            var corner = DWMWCP_DEFAULT;
+            DwmSetWindowAttribute(hwnd, DWMWA_WINDOW_CORNER_PREFERENCE, ref corner, sizeof(int));
+            var noBorder = DwmColorNone;
+            DwmSetWindowAttribute(hwnd, DWMWA_BORDER_COLOR, ref noBorder, sizeof(int));
         }
         catch
         {

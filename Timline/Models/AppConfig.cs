@@ -16,4 +16,8 @@ public class AppConfig
 
     public double? WindowX { get; set; }
     public double? WindowY { get; set; }
+
+    /// <summary>卡片大小（DIP），拖拽窗口边缘/角落调整；为空时使用默认尺寸。</summary>
+    public double? WindowWidth { get; set; }
+    public double? WindowHeight { get; set; }
 }

@@ -24,12 +24,15 @@ public partial class App : Application
                     ScreenshotSettings ? "timline-settings.png" : "timline-widget.png");
         }
 
-        // 防止开机自启 + 手动打开时出现两个控件
-        _singleInstanceMutex = new Mutex(true, @"Timline::SingleInstance", out var createdNew);
-        if (!createdNew)
+        // 防止开机自启 + 手动打开时出现两个控件；截图模式豁免——否则控件正在运行时无法出图验证
+        if (ScreenshotPath is null)
         {
-            Shutdown();
-            return;
+            _singleInstanceMutex = new Mutex(true, @"Timline::SingleInstance", out var createdNew);
+            if (!createdNew)
+            {
+                Shutdown();
+                return;
+            }
         }
         base.OnStartup(e);
     }
