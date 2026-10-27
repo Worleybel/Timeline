@@ -1,4 +1,4 @@
-# 一键发布 Timline：打包自包含单文件 exe → 创建 GitHub Release → 上传附件
+﻿# 一键发布 Timline：打包自包含单文件 exe → 创建 GitHub Release → 上传附件
 # 用法：
 #   powershell -File tools\release.ps1                  # 版本号自动在最新 tag 上递增 patch
 #   powershell -File tools\release.ps1 -Version 2.0.0   # 指定版本号
@@ -12,6 +12,11 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+
+# ---- 编码统一为 UTF-8：PS5.1 默认按本地代码页解码 git 输出、按 ISO-8859-1 发送
+# 请求体，中文提交信息会变问号（无控制台宿主下该赋值可能失败，不致命） ----
+try { [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding $false } catch { }
+
 $RepoRoot = Split-Path -Parent $PSScriptRoot
 $Project  = Join-Path $RepoRoot 'Timline'
 $PublishDir = Join-Path $RepoRoot 'publish'
@@ -31,7 +36,11 @@ function Invoke-GhApi {
     [CmdletBinding()]
     param($Method, $Uri, $Body)
     $params = @{ Method = $Method; Uri = $Uri; Headers = $headers }
-    if ($Body) { $params.Body = $Body; $params.ContentType = 'application/json' }
+    # body 必须显式转 UTF-8 字节：PS5.1 对字符串 body 默认 ISO-8859-1，中文会丢成 ?
+    if ($Body) {
+        $params.Body = [Text.Encoding]::UTF8.GetBytes($Body)
+        $params.ContentType = 'application/json; charset=utf-8'
+    }
     Invoke-RestMethod @params
 }
 
