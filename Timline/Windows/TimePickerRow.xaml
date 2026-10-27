@@ -1,0 +1,39 @@
+<UserControl x:Class="Timline.Windows.TimePickerRow"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <UserControl.Resources>
+        <Style x:Key="SegBox" TargetType="TextBox">
+            <Setter Property="Background" Value="#0D1117" />
+            <Setter Property="Foreground" Value="#E6EDF3" />
+            <Setter Property="CaretBrush" Value="#E6EDF3" />
+            <Setter Property="BorderBrush" Value="#30363D" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="TextAlignment" Value="Center" />
+            <Setter Property="MaxLength" Value="2" />
+            <Setter Property="Width" Value="38" />
+            <Setter Property="Padding" Value="0,5" />
+            <Setter Property="FontSize" Value="13" />
+            <Style.Triggers>
+                <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                    <Setter Property="BorderBrush" Value="#58A6FF" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+
+    <StackPanel>
+        <TextBlock x:Name="Lbl" FontSize="11" Foreground="#8B949E" Margin="0,0,0,4" />
+        <StackPanel Orientation="Horizontal">
+            <TextBox x:Name="TbHour" Style="{StaticResource SegBox}"
+                     PreviewTextInput="DigitOnly" TextChanged="HourTextChanged"
+                     GotFocus="SegmentGotFocus" LostFocus="SegmentLostFocus"
+                     PreviewKeyDown="HourKeyDown" />
+            <TextBlock Text=":" FontWeight="Bold" Foreground="#E6EDF3"
+                       VerticalAlignment="Center" Margin="4,0" />
+            <TextBox x:Name="TbMinute" Style="{StaticResource SegBox}"
+                     PreviewTextInput="DigitOnly" TextChanged="MinuteTextChanged"
+                     GotFocus="SegmentGotFocus" LostFocus="SegmentLostFocus"
+                     PreviewKeyDown="MinuteKeyDown" />
+        </StackPanel>
+    </StackPanel>
+</UserControl>
