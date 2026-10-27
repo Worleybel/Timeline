@@ -38,7 +38,13 @@
 
 ## 🚀 快速开始
 
-环境要求：**Windows 10 1809+ / Windows 11**，构建需 [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)。
+### 下载安装（推荐）
+
+到 [Releases](https://github.com/Worleybel/Timeline/releases/latest) 下载 `Timline-x.x.x-win-x64.exe`（自包含单文件，内置 .NET 10 运行时，免安装），双击即用，系统要求 **Windows 10 1809+ / Windows 11**。
+
+### 从源码构建
+
+构建需 [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)：
 
 ```bash
 git clone https://github.com/Worleybel/Timeline.git
@@ -48,10 +54,10 @@ cd Timeline
 dotnet run --project Timline
 
 # 构建
-dotnet build Timline.sln
+dotnet build Timline.slnx
 
 # 发布为自包含单文件 exe（目标机器无需安装 .NET）
-dotnet publish Timline -c Release -r win-x64 /p:PublishSingleFile=true --self-contained
+dotnet publish Timline -c Release -r win-x64 -p:PublishSingleFile=true --self-contained
 ```
 
 也可以直接用 Visual Studio 2022/2026 打开 `Timline.slnx`（F5 即跑）。
