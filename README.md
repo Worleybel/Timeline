@@ -121,4 +121,9 @@ docs/                           截图
 ## 🙏 致谢
 
 - [holiday-cn](https://github.com/NateScarlet/holiday-cn) — 中国法定节假日数据
+- [Hardcodet.NotifyIcon.Wpf](https://github.com/hardcodet/wpf-notifyicon) — 托盘图标与气泡通知
+
+## 📄 许可证
+
+本项目基于 [MIT License](LICENSE) 开源。
 - [Hardcodet.NotifyIcon.Wpf](https://github.com/hardcodet/wpf-notifyicon) — 托盘图标
