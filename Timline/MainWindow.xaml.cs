@@ -39,6 +39,7 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
         _config = ConfigService.Load();
+        HolidayService.Instance.ApplyUserOverrides(_config);
         _calc = new CountdownCalculator(_config, HolidayService.Instance);
 
         HolidayService.Instance.EnsureLoadedInBackground(
@@ -61,7 +62,7 @@ public partial class MainWindow : Window
             ConfigService.Save(_config);
         };
 
-        if (App.ScreenshotSettings)
+        if (App.ScreenshotSettings || App.OpenSettingsOnly)
         {
             Loaded += (_, _) => OpenSettings();
         }
@@ -386,6 +387,7 @@ public partial class MainWindow : Window
     {
         var window = new SettingsWindow(_config, () =>
         {
+            HolidayService.Instance.ApplyUserOverrides(_config);
             ApplyCardStyle();
             ApplyBlurVisuals();
             UpdateDisplay();

@@ -92,7 +92,11 @@ public sealed class CountdownCalculator
     {
         var today = DateOnly.FromDateTime(now);
         var offs = _holidays.AllHolidays();
-        if (offs.Count == 0) return "假期数据加载中…";
+        if (offs.Count == 0)
+        {
+            if (!_holidays.HasData) return "假期数据加载中…";
+            return _holidays.IgnoringStatutory ? "未跟随法定假期" : "年度假期已过完";
+        }
 
         var dates = offs.Select(x => x.Date).ToHashSet();
         if (dates.Contains(today))

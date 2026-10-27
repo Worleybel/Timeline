@@ -13,6 +13,9 @@ public partial class App : Application
     /// <summary>截图目标是设置窗口而非主控件。</summary>
     public static bool ScreenshotSettings { get; private set; }
 
+    /// <summary>启动后直接打开设置窗口（开发/演示用）。</summary>
+    public static bool OpenSettingsOnly { get; private set; }
+
     protected override void OnStartup(StartupEventArgs e)
     {
         if (e.Args.Length > 0 && e.Args[0] is "--screenshot" or "--screenshot-settings")
@@ -23,6 +26,7 @@ public partial class App : Application
                 : Path.Combine(Path.GetTempPath(),
                     ScreenshotSettings ? "timline-settings.png" : "timline-widget.png");
         }
+        OpenSettingsOnly = e.Args.Contains("--settings");
 
         // 防止开机自启 + 手动打开时出现两个控件；截图模式豁免——否则控件正在运行时无法出图验证
         if (ScreenshotPath is null)

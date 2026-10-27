@@ -1,0 +1,40 @@
+<UserControl x:Class="Timline.Windows.DateRow"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <UserControl.Resources>
+        <Style x:Key="SegBox" TargetType="TextBox">
+            <Setter Property="Background" Value="#0D1117" />
+            <Setter Property="Foreground" Value="#E6EDF3" />
+            <Setter Property="CaretBrush" Value="#E6EDF3" />
+            <Setter Property="BorderBrush" Value="#30363D" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="TextAlignment" Value="Center" />
+            <Setter Property="Padding" Value="0,5" />
+            <Setter Property="FontSize" Value="13" />
+            <Style.Triggers>
+                <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                    <Setter Property="BorderBrush" Value="#58A6FF" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+
+    <StackPanel Orientation="Horizontal">
+        <TextBox x:Name="TbYear" Style="{StaticResource SegBox}" MaxLength="4" Width="50"
+                 PreviewTextInput="DigitOnly" TextChanged="YearTextChanged"
+                 GotFocus="SegmentGotFocus" LostFocus="SegmentLostFocus"
+                 PreviewKeyDown="YearKeyDown" />
+        <TextBlock Text="-" FontWeight="Bold" Foreground="#E6EDF3"
+                   VerticalAlignment="Center" Margin="4,0" />
+        <TextBox x:Name="TbMonth" Style="{StaticResource SegBox}" MaxLength="2" Width="36"
+                 PreviewTextInput="DigitOnly" TextChanged="MonthTextChanged"
+                 GotFocus="SegmentGotFocus" LostFocus="SegmentLostFocus"
+                 PreviewKeyDown="MonthKeyDown" />
+        <TextBlock Text="-" FontWeight="Bold" Foreground="#E6EDF3"
+                   VerticalAlignment="Center" Margin="4,0" />
+        <TextBox x:Name="TbDay" Style="{StaticResource SegBox}" MaxLength="2" Width="36"
+                 PreviewTextInput="DigitOnly" TextChanged="DayTextChanged"
+                 GotFocus="SegmentGotFocus" LostFocus="SegmentLostFocus"
+                 PreviewKeyDown="DayKeyDown" />
+    </StackPanel>
+</UserControl>
